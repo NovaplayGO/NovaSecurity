@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NOVAPLAY | SECURITY</title>
+    <link rel="icon" type="image/webp" href="https://raw.githubusercontent.com/NovaplayGO/novaimg/main/novasplash.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e50914;
+            --primary-hover: #b91c1c;
+            --bg: #080a10;
+            --card-bg: #11151f;
+            --input-bg: #1a1f2e;
+            --text: #ffffff;
+            --text-muted: #9aa3b2;
+            --border: #293246;
+            --success: #10b981;
+            --error: #ef4444;
+            --nav-height: 70px;
+        }
+
+        * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+        html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+        /* Navegación Premium (Igual a panel-canales) */
+        .nova-nav { position: fixed; top: 0; width: 100%; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .nav-inner { max-width: 1400px; margin: auto; height: var(--nav-height); padding: 0 30px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 900; font-size: 22px; letter-spacing: -1px; }
+        .nav-brand img { width: 36px; height: 32px; border-radius: 8px; }
+
+        .nav-links { display: flex; gap: 15px; align-items: center; }
+        .nav-links a { color: #ccc; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; padding: 10px 15px; border-radius: 10px; }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+        .btn-login-nav, .btn-logout {
+            background: var(--primary);
+            color: #fff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            display: none;
+            transition: 0.2s;
+        }
+        .btn-login-nav:hover, .btn-logout:hover { transform: scale(1.05); background: var(--primary-hover); }
+        .btn-logout { background: var(--error); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+
+        .nav-toggle { display: none; }
+
+        /* Dropdown de Administración Premium - FIX DEFINITIVO */
+        .admin-menu { position: relative; display: none; align-items: center; height: var(--nav-height); padding: 0 10px; }
+        .btn-admin { background: #fff; color: #000; font-weight: 900; border: none; cursor: pointer; padding: 10px 20px; border-radius: 12px; font-size: 13px; display: flex; align-items: center; gap: 10px; transition: 0.2s; position: relative; z-index: 10002; }
+        .btn-admin:hover { background: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(229,9,20,0.4); }
+        .dropdown-content { position: absolute; top: 100%; right: 0; background: var(--card-bg); min-width: 260px; border-radius: 20px; border: 1px solid var(--border); overflow: hidden; display: none; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 10001; margin-top: 5px; }
+        .dropdown-content::before { content: ""; position: absolute; top: -30px; left: 0; right: 0; height: 40px; background: transparent; }
+        .admin-menu:hover .dropdown-content { display: flex; }
+        .dropdown-content a { padding: 15px 20px; color: #fff !important; text-decoration: none !important; font-size: 13px !important; font-weight: 700 !important; border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .dropdown-content a i { width: 20px; color: var(--primary); text-align: center; }
+        .dropdown-content a:hover { background: rgba(255,255,255,0.05); padding-left: 25px; }
+        .dropdown-content .logout-link { color: var(--error) !important; border-bottom: none; }
+        .dropdown-content .logout-link i { color: var(--error); }
+
+        .btn-premium {
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 11px;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-premium:hover { transform: scale(1.02); filter: brightness(1.1); }
+        .btn-premium.alt { background: #222; }
+
+        .app-container { display: flex; flex-direction: column; height: calc(100% - var(--nav-height)); margin-top: var(--nav-height); overflow-y: auto; padding: 40px 20px; gap: 30px; align-items: center; }
+
+        /* Dashboard Cards */
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 25px; padding: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; width: 100%; max-width: 1300px; }
+        .card h2 { font-size: 20px; font-weight: 900; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
+        .card h2 i { color: var(--primary); }
+
+        /* Tables */
+        .table-container { overflow-x: auto; border-radius: 15px; background: #080a10; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #1a1f2e; color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 15px; position: sticky; top: 0; }
+        td { padding: 15px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        code { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 8px; background: #1a1f2e; border-radius: 6px; }
+
+        /* Action Buttons */
+        .btn-icon { background: none; border: none; color: inherit; cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s; }
+        .btn-icon:hover { background: rgba(255,255,255,0.1); color: var(--primary); }
+        .btn-danger-text { background: rgba(239,68,68,0.1); color: var(--error); padding: 6px 15px; border-radius: 10px; font-size: 11px; font-weight: 900; border: none; cursor: pointer; }
+        .btn-danger-text:hover { background: var(--error); color: #fff; }
+
+        /* Login */
+        #auth-view { position: fixed; inset: 0; background: var(--bg); z-index: 10001; display: flex; justify-content: center; align-items: center; }
+        .auth-card { width: 400px; padding: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 35px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+        .auth-card input { width: 100%; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; color: #fff; margin-bottom: 15px; font-size: 15px; }
+        .status { margin-top: 15px; padding: 14px; border-radius: 12px; font-size: 13px; font-weight: 800; display: none; text-align: center; }
+        .status.error { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid var(--error); }
+
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
+
+        .btn-primary { background: var(--primary); color: #fff; border: none; cursor: pointer; transition: 0.2s; }
+
+        /* Logs Grid */
+        .logs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+        .log-item { background: #080a10; border: 1px solid var(--border); padding: 20px; border-radius: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .log-item h4 { font-size: 13px; word-break: break-all; color: #fff; flex-grow: 1; }
+
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        /* NovaModal Premium */
+        .nova-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 20000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .nova-modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 30px; width: 100%; max-width: 450px; padding: 40px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; animation: modal-in 0.3s ease-out; }
+        @keyframes modal-in { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .nova-modal h3 { font-size: 22px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; }
+        .nova-modal p { color: var(--text-muted); font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
+        .nova-modal input { width: 100%; padding: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; color: #fff; margin-bottom: 20px; font-size: 15px; }
+        .nova-modal-btns { display: flex; gap: 12px; }
+        .nova-modal-btn { flex: 1; padding: 15px; border-radius: 14px; border: 0; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-confirm { background: var(--primary); color: #fff; }
+        .btn-cancel { background: #222; color: #fff; }
+        .nova-modal-btn:hover { transform: scale(1.03); }
+
+        /* Responsividad Mejorada */
+        @media (max-width: 900px) {
+            html, body { height: auto !important; overflow-y: auto !important; }
+            .nav-inner { padding: 0 15px; }
+            .nav-toggle { display: flex; background: none; border: none; cursor: pointer; padding: 10px; flex-direction: column; gap: 5px; z-index: 10001; }
+            .nav-toggle span { display: block; width: 25px; height: 3px; background: #fff; transition: 0.3s; border-radius: 2px; }
+
+            .nav-links {
+                position: fixed; top: 0; right: -100%; width: 100%; height: 100vh;
+                background: rgba(8, 10, 16, 0.98); backdrop-filter: blur(20px);
+                flex-direction: column; justify-content: flex-start; align-items: center;
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); gap: 15px; padding: 100px 40px 40px;
+                overflow-y: auto;
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a { font-size: 18px; width: 100%; text-align: center; padding: 15px; border-radius: 15px; }
+
+            /* Ajuste del botón PANEL en móvil */
+            .admin-menu { width: 100%; height: auto; justify-content: center; padding: 0; flex-direction: column; }
+            .admin-menu.active .dropdown-content { opacity: 1; visibility: visible; display: flex; }
+            .btn-admin { width: 100%; justify-content: center; padding: 18px; font-size: 16px; border-radius: 15px; }
+            .dropdown-content { position: relative; width: 100%; top: 0; margin-top: 10px; opacity: 0; visibility: hidden; display: none; transform: none; box-shadow: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+            .dropdown-content a { padding: 15px; font-size: 14px !important; }
+
+            .nav-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .nav-toggle.active span:nth-child(2) { opacity: 0; }
+            .nav-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+            /* Cards en móvil */
+            .app-container { padding: 20px 10px; gap: 20px; }
+            .card { padding: 20px; border-radius: 20px; }
+            div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+
+            .auth-card { width: 95%; padding: 30px 20px; border-radius: 25px; }
+
+            /* Tablas en móvil */
+            .table-container { margin: 0 -10px; border-radius: 0; border-left: none; border-right: none; }
+            td, th { padding: 10px 8px; font-size: 11px; }
+
+            footer { padding: 40px 15px; background: #000; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 40px; width: 100%; }
+            .footer-text { font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nova-nav">
+    <div class="nav-inner">
+        <a class="nav-brand" href="https://novaplaygo.github.io/Dashboard/">
+            <img src="https://raw.githubusercontent.com/NovaplayGO/novaimg/main/novasplash.webp">
+            NOVAPLAY | SECURITY
+        </a>
+        <div class="nav-links" id="navLinks">
+            <a href="https://novaplaygo.github.io/" style="color: var(--primary); font-weight: 800;">INICIO</a>
+            <a href="#" onclick="loadData(); return false;" id="navReload" style="display:none; color: var(--success); font-weight: 800;"><i class="fas fa-sync-alt"></i> RECARGAR</a>
+            <button class="btn-login-nav" id="navLogin" onclick="UI_MostrarLogin()">INGRESAR</button>
+            <div class="admin-menu" id="adminMenu">
+                <button class="btn-admin"><i class="fas fa-user-shield"></i> PANEL</button>
+                <div class="dropdown-content">
+                    <a href="https://novaplaygo.github.io/Dashboard/"><i class="fas fa-chart-line"></i> Dashboard Central</a>
+                    <a href="https://novaplaygo.github.io/panel-canales/"><i class="fas fa-tv"></i> Admin. Canales</a>
+                    <a href="https://novaplaygo.github.io/NovaSecurity/"><i class="fas fa-shield-alt"></i> NovaSecurity</a>
+                    <a href="https://novaplaygo.github.io/novaimg/actualizar-icono/"><i class="fas fa-icons"></i> Gestión de Iconos</a>
+                    <a href="https://novaplaygo.github.io/novaimg/generador/"><i class="fas fa-magic"></i> Icon Studio</a>
+                    <a href="#" onclick="cerrarSesion(); return false;" class="logout-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+        <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+
+<div id="auth-view" class="hidden">
+    <div class="auth-card">
+        <h2 style="margin-bottom:30px; font-weight:900; font-size: 28px;">Acceso al Panel</h2>
+        <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">Usuario</label>
+            <input type="text" id="username" placeholder="Usuario Staff">
+        </div>
+        <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase;">Contraseña</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary" id="loginButton" style="width:100%; justify-content:center; padding: 18px; border-radius: 14px; font-weight: 900;" onclick="iniciarSesion()">ENTRAR A NOVASECURITY</button>
+        <div id="loginStatus" class="status"></div>
+    </div>
+</div>
+
+<div class="app-container hidden" id="main-panel">
+    <div class="card">
+        <h2><i class="fas fa-bolt"></i> Sesiones en Tiempo Real</h2>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Usuario</th><th>ID Hardware</th><th>Firma Hardware</th><th>Modelo / App</th><th>Acción</th></tr></thead>
+                <tbody id="users-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; width: 100%; max-width: 1300px;">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <h2 style="margin:0;"><i class="fas fa-user-slash"></i> Lista Negra</h2>
+                <button class="btn-danger-text" onclick="addBlacklist('')" style="font-size:10px; padding:8px 15px;">+ AÑADIR MANUAL</button>
+            </div>
+            <div class="table-container">
+                <table><thead><tr><th>ID / Firma Baneada</th><th>Acción</th></tr></thead><tbody id="blacklist-tbody"></tbody></table>
+            </div>
+        </div>
+        <div class="card">
+            <h2><i class="fas fa-file-medical-alt"></i> Reportes de Emergencia</h2>
+            <div id="logs-container" class="logs-grid" style="overflow-y:auto; max-height:400px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="nova-modal-overlay" id="novaModal">
+    <div class="nova-modal">
+        <h3 id="novaModalTitle" style="font-weight:900;">Confirmar</h3>
+        <p id="novaModalMessage" style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.5;"></p>
+        <div id="modalInputContainer" class="hidden">
+            <input type="text" id="modalInput" placeholder="...">
+            <select id="modalSelect" class="hidden"></select>
+        </div>
+        <div class="nova-modal-btns">
+            <button class="nova-modal-btn btn-cancel" id="novaModalCancel">CANCELAR</button>
+            <button class="nova-modal-btn btn-confirm" id="novaModalConfirm">ACEPTAR</button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-text">
+        © 2026 NOVAPLAY TV<br>
+        © 2010 - 2026 - NOVAPLAY TV. TODOS LOS DERECHOS RESERVADOS
+    </div>
+</footer>
+
+<script>
+    const API_URL = "https://mrghnngupolsgatcmevw.supabase.co/functions/v1/actualizar-canales";
+    let sessionToken = localStorage.getItem("novaplay_session_token") || "";
+    let deviceDict = {};
+
+    async function loadDeviceDict() {
+        try {
+            const res = await fetch('devices.json?t=' + Date.now());
+            if (res.ok) deviceDict = await res.json();
+        } catch (e) { console.error("Error cargando diccionario de dispositivos:", e); }
+    }
+
+    function traducirModelo(cod) {
+        if (!cod) return "Desconocido";
+        // Buscar en el diccionario (Filtrado para Xiaomi/Samsung)
+        if (deviceDict[cod]) return deviceDict[cod];
+
+        // Identificar Xiaomi por patrones conocidos (Códigos que terminan en G, C, I o empiezan por M2)
+        if (/^[0-9]{2,}[A-Z]{2,}[0-9]+[GCI]$/.test(cod) || cod.startsWith("M2")) {
+            return "Xiaomi (" + cod + ")";
+        }
+
+        // Identificar Samsung por patrones conocidos (Códigos SM-)
+        if (cod.startsWith("SM-")) {
+            return "Samsung (" + cod + ")";
+        }
+
+        return cod;
+    }
+
+    function novaToast(message) {
+        const toast = document.createElement("div");
+        toast.style.cssText = "position:fixed; bottom:20px; right:20px; background:rgba(16,185,129,0.9); color:white; padding:15px 25px; border-radius:12px; font-weight:800; z-index:10000; animation: toast-in 0.4s ease;";
+        toast.textContent = "✅ " + message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    async function req(body) {
+        const h = { "Content-Type": "application/json" };
+        if (sessionToken) h.Authorization = "Bearer " + sessionToken;
+        const r = await fetch(API_URL, { method: "POST", headers: h, body: JSON.stringify(body) });
+        const d = await r.json();
+        if (r.status === 401) cerrarSesion();
+        return d;
+    }
+
+    function UI_MostrarPanel() {
+        document.getElementById("auth-view").classList.add("hidden");
+        document.getElementById("main-panel").classList.remove("hidden");
+        document.getElementById("navLogin").style.display = 'none';
+        document.getElementById("adminMenu").style.display = 'flex';
+        document.getElementById("navReload").style.display = 'block';
+    }
+
+    function UI_MostrarLogin() {
+        document.getElementById("auth-view").classList.remove("hidden");
+        document.getElementById("main-panel").classList.add("hidden");
+        document.getElementById("navLogin").style.display = 'block';
+        document.getElementById("adminMenu").style.display = 'none';
+        document.getElementById("navReload").style.display = 'none';
+    }
+
+    async function iniciarSesion() {
+        const u = document.getElementById("username").value;
+        const p = document.getElementById("password").value;
+        const btn = document.getElementById("loginButton");
+        btn.disabled = true; btn.innerText = "VERIFICANDO...";
+
+        const res = await req({ action: "login", username: u, password: p });
+        if (res.token) {
+            sessionToken = res.token;
+            localStorage.setItem("novaplay_session_token", res.token);
+            UI_MostrarPanel();
+            loadData();
+        } else {
+            const el = document.getElementById("loginStatus");
+            el.className = "status error";
+            el.textContent = "Acceso denegado.";
+            el.style.display = "block";
+            btn.disabled = false;
+            btn.textContent = 'ENTRAR A NOVASECURITY';
+        }
+    }
+
+    function cerrarSesion() {
+        openModal("Cerrar Sesión", "¿Estás seguro que deseas salir de NovaSecurity?", () => {
+            localStorage.removeItem("novaplay_session_token");
+            location.reload();
+        });
+    }
+
+    /* NovaModal Premium */
+    function openModal(title, msg, onConfirm, type = "confirm", options = [], defaultValue = "") {
+        const m = document.getElementById("novaModal");
+        if (!m) return;
+        document.getElementById("novaModalTitle").innerText = title;
+        document.getElementById("novaModalMessage").innerText = msg;
+        const inputContainer = document.getElementById("modalInputContainer");
+        const input = document.getElementById("modalInput");
+        const select = document.getElementById("modalSelect");
+
+        if (inputContainer) inputContainer.classList.add("hidden");
+        if (input) input.classList.add("hidden");
+        if (select) select.classList.add("hidden");
+
+        if (type === "prompt") {
+            if (inputContainer) inputContainer.classList.remove("hidden");
+            if (input) {
+                input.classList.remove("hidden");
+                input.value = defaultValue;
+                setTimeout(() => input.focus(), 100);
+            }
+        } else if (type === "select") {
+            if (inputContainer) inputContainer.classList.remove("hidden");
+            if (select) {
+                select.classList.remove("hidden");
+                select.innerHTML = options.map(o => `<option value="${o.value}">${o.text}</option>`).join('');
+                setTimeout(() => select.focus(), 100);
+            }
+        }
+
+        m.style.display = "flex";
+
+        const close = () => { m.style.display = "none"; };
+        document.getElementById("novaModalCancel").onclick = close;
+        document.getElementById("novaModalConfirm").onclick = () => {
+            if (type === "prompt") onConfirm(input.value);
+            else if (type === "select") onConfirm(select.value);
+            else onConfirm();
+            close();
+        };
+    }
+
+    async function loadData() {
+        if (!sessionToken) return;
+
+        // Cargar Diccionario y Usuarios en paralelo
+        const [dictRes, usersRes] = await Promise.all([
+            loadDeviceDict(),
+            req({ action: "seguridad_listar_usuarios" })
+        ]);
+
+        let users = usersRes;
+
+        // Ordenar por Versión (Semántico: más nuevas primero)
+        if (Array.isArray(users)) {
+            users.sort((a, b) => {
+                const vA = (a.version_app || "0").replace(/[^\d.]/g, '').split('.').map(Number);
+                const vB = (b.version_app || "0").replace(/[^\d.]/g, '').split('.').map(Number);
+                for (let i = 0; i < Math.max(vA.length, vB.length); i++) {
+                    const nA = vA[i] || 0;
+                    const nB = vB[i] || 0;
+                    if (nA > nB) return -1;
+                    if (nA < nB) return 1;
+                }
+                return 0;
+            });
+        }
+
+        document.getElementById('users-tbody').innerHTML = users.map(u => `
+            <tr>
+                <td><b>${u.usuario}</b></td>
+                <td><code>${u.novaplay_id}</code></td>
+                <td><code style="color:var(--primary)">${u.firma_hardware || 'N/A'}</code></td>
+                <td>
+                    <b>${traducirModelo(u.modelo_dispositivo)}</b><br>
+                    <small>${u.version_app}</small>
+                </td>
+                <td>
+                    <button class="btn-icon" onclick="addBlacklist('${u.novaplay_id}')" title="Banear ID"><i class="fas fa-id-badge"></i></button>
+                    <button class="btn-icon" onclick="addBlacklist('${u.firma_hardware}')" title="Banear Firma" ${u.firma_hardware ? '' : 'disabled'}><i class="fas fa-fingerprint"></i></button>
+                </td>
+            </tr>
+        `).join('');
+
+        // Cargar Blacklist
+        const black = await req({ action: "seguridad_listar_blacklist" });
+        document.getElementById('blacklist-tbody').innerHTML = black.map(b => `
+            <tr>
+                <td><code>${b.novaplay_id}</code></td>
+                <td><button class="btn-danger-text" onclick="removeBlacklist(${b.id})">BORRAR</button></td>
+            </tr>
+        `).join('');
+
+        // Cargar Logs
+        const logs = await req({ action: "listar_logs" });
+        document.getElementById('logs-container').innerHTML = logs.map(l => `
+            <div class="log-item">
+                <h4>${l.name}</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:5px;">
+                    <a href="https://wxlhqitmigmkpfcsqyzt.supabase.co/storage/v1/object/public/Logs_NovaPlay/${l.name}" target="_blank" class="btn-premium">VER</a>
+                    <button class="btn-premium alt" onclick="downloadLog('${l.name}')">DESCARGAR</button>
+                    <button class="btn-danger-text" onclick="deleteLog('${l.name}')" style="grid-column: span 2; padding:8px; font-size:10px;">BORRAR REPORTE</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function downloadLog(name) {
+        const url = `https://wxlhqitmigmkpfcsqyzt.supabase.co/storage/v1/object/public/Logs_NovaPlay/${name}`;
+        try {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = name;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        } catch (e) { alert("Error al descargar"); }
+    }
+
+    async function deleteLog(name) {
+        openModal("Eliminar Reporte", `¿Estás seguro de eliminar permanentemente el reporte "${name}"?`, async () => {
+            const res = await req({ action: "seguridad_eliminar_log", name: name });
+            if (res.success) {
+                novaToast("Reporte eliminado correctamente");
+                loadData();
+            } else {
+                alert("Error al eliminar reporte: " + (res.error || "Desconocido"));
+            }
+        });
+    }
+
+    async function addBlacklist(id) {
+        if (!id) {
+            openModal("Banear Manual", "Ingrese el ID o Firma a bloquear:", (manualId) => {
+                if (!manualId) return;
+                // Chaining second modal for reason
+                setTimeout(() => {
+                    openModal("Motivo del Bloqueo", "Indique el motivo del baneo:", async (reason) => {
+                        if (!reason) return;
+                        const res = await req({ action: "seguridad_add_blacklist", novaplay_id: manualId, reason: reason });
+                        if (res.success) {
+                            novaToast("Dispositivo bloqueado");
+                            loadData();
+                        } else alert("Error");
+                    }, "prompt", "Actividad sospechosa detectada.");
+                }, 300);
+            }, "prompt", "");
+            return;
+        }
+
+        openModal("Bloquear Dispositivo", "Indique el motivo del baneo:", async (reason) => {
+            if (!reason) return;
+            const res = await req({ action: "seguridad_add_blacklist", novaplay_id: id, reason: reason });
+            if (res.success) {
+                novaToast("Dispositivo bloqueado");
+                loadData();
+            } else alert("Error");
+        }, "prompt", "Actividad sospechosa detectada.");
+    }
+
+    async function removeBlacklist(id) {
+        openModal("Desbloquear", "¿Deseas sacar este dispositivo de la lista negra?", async () => {
+            const res = await req({ action: "seguridad_remove_blacklist", id_db: id });
+            if (res.success) {
+                novaToast("Dispositivo desbloqueado");
+                loadData();
+            }
+        });
+    }
+
+    // Toggle Menú Móvil
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    const adminMenu = document.getElementById('adminMenu');
+    const btnAdmin = document.querySelector('.btn-admin');
+
+    if (navToggle) {
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+    }
+
+    // Toggle Dropdown en Móvil
+    if (btnAdmin) {
+        btnAdmin.addEventListener('click', (e) => {
+            if (window.innerWidth <= 900) {
+                e.preventDefault();
+                adminMenu.classList.toggle('active');
+            }
+        });
+    }
+
+    // Cerrar menú al clickear link (móvil)
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (navToggle) navToggle.classList.remove('active');
+            if (navLinks) navLinks.classList.remove('active');
+        });
+    });
+
+    document.getElementById("password").addEventListener("keydown", e => { if (e.key === "Enter") iniciarSesion(); });
+
+    if (sessionToken) UI_MostrarPanel(), loadData();
+    else UI_MostrarLogin();
+</script>
+</body>
+</html>
