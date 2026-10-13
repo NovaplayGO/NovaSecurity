@@ -453,7 +453,7 @@
                 <td><code style="color:var(--primary)">${u.firma_hardware || 'N/A'}</code></td>
                 <td>
                     <b>${traducirModelo(u.modelo_dispositivo)}</b><br>
-                    <small>${u.version_app}</small>
+                    <small>${u.version_app} • <span style="color:#00e5ff">${u.version_android || 'Android'}</span></small>
                 </td>
                 <td>
                     <button class="btn-icon" onclick="addBlacklist('${u.novaplay_id}')" title="Banear ID"><i class="fas fa-id-badge"></i></button>
