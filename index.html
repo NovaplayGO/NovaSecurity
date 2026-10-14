@@ -316,10 +316,12 @@
         return cod;
     }
 
-    function novaToast(message) {
+    function novaToast(message, isError = false) {
         const toast = document.createElement("div");
-        toast.style.cssText = "position:fixed; bottom:20px; right:20px; background:rgba(16,185,129,0.9); color:white; padding:15px 25px; border-radius:12px; font-weight:800; z-index:10000; animation: toast-in 0.4s ease;";
-        toast.textContent = "✅ " + message;
+        const bg = isError ? "rgba(239,68,68,0.9)" : "rgba(16,185,129,0.9)";
+        const icon = isError ? "❌ " : "✅ ";
+        toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:${bg}; color:white; padding:15px 25px; border-radius:12px; font-weight:800; z-index:10000; animation: toast-in 0.4s ease;`;
+        toast.textContent = icon + message;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
@@ -422,17 +424,19 @@
 
     async function loadData() {
         if (!sessionToken) return;
+        const reloadIcon = document.querySelector("#navReload i");
+        if (reloadIcon) reloadIcon.classList.add("fa-spin");
 
-        // Cargar Diccionario y Usuarios en paralelo
-        const [dictRes, usersRes] = await Promise.all([
-            loadDeviceDict(),
-            req({ action: "seguridad_listar_usuarios" })
-        ]);
+        try {
+            // Cargar Diccionario y Usuarios en paralelo
+            const [dictRes, usersRes] = await Promise.all([
+                loadDeviceDict(),
+                req({ action: "seguridad_listar_usuarios" })
+            ]);
 
-        let users = usersRes;
+            let users = Array.isArray(usersRes) ? usersRes : [];
 
-        // Ordenar por Versión (Semántico: más nuevas primero)
-        if (Array.isArray(users)) {
+            // Ordenar por Versión (Semántico: más nuevas primero)
             users.sort((a, b) => {
                 const vA = (a.version_app || "0").replace(/[^\d.]/g, '').split('.').map(Number);
                 const vB = (b.version_app || "0").replace(/[^\d.]/g, '').split('.').map(Number);
@@ -444,45 +448,54 @@
                 }
                 return 0;
             });
-        }
 
-        document.getElementById('users-tbody').innerHTML = users.map(u => `
-            <tr>
-                <td><b>${u.usuario}</b></td>
-                <td><code>${u.novaplay_id}</code></td>
-                <td><code style="color:var(--primary)">${u.firma_hardware || 'N/A'}</code></td>
-                <td>
-                    <b>${traducirModelo(u.modelo_dispositivo)}</b><br>
-                    <small>${u.version_app} • <span style="color:#00e5ff">${u.version_android || 'Android'}</span></small>
-                </td>
-                <td>
-                    <button class="btn-icon" onclick="addBlacklist('${u.novaplay_id}')" title="Banear ID"><i class="fas fa-id-badge"></i></button>
-                    <button class="btn-icon" onclick="addBlacklist('${u.firma_hardware}')" title="Banear Firma" ${u.firma_hardware ? '' : 'disabled'}><i class="fas fa-fingerprint"></i></button>
-                </td>
-            </tr>
-        `).join('');
+            document.getElementById('users-tbody').innerHTML = users.map(u => `
+                <tr>
+                    <td><b>${u.usuario}</b></td>
+                    <td><code>${u.novaplay_id}</code></td>
+                    <td><code style="color:var(--primary)">${u.firma_hardware || 'N/A'}</code></td>
+                    <td>
+                        <b>${traducirModelo(u.modelo_dispositivo)}</b><br>
+                        <small>${u.version_app} • <span style="color:#00e5ff">${u.version_android || 'Android'}</span></small>
+                    </td>
+                    <td>
+                        <button class="btn-icon" onclick="addBlacklist('${u.novaplay_id}')" title="Banear ID"><i class="fas fa-id-badge"></i></button>
+                        <button class="btn-icon" onclick="addBlacklist('${u.firma_hardware}')" title="Banear Firma" ${u.firma_hardware ? '' : 'disabled'}><i class="fas fa-fingerprint"></i></button>
+                    </td>
+                </tr>
+            `).join('') || `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No hay sesiones activas</td></tr>`;
 
-        // Cargar Blacklist
-        const black = await req({ action: "seguridad_listar_blacklist" });
-        document.getElementById('blacklist-tbody').innerHTML = black.map(b => `
-            <tr>
-                <td><code>${b.novaplay_id}</code></td>
-                <td><button class="btn-danger-text" onclick="removeBlacklist(${b.id})">BORRAR</button></td>
-            </tr>
-        `).join('');
+            // Cargar Blacklist
+            const black = await req({ action: "seguridad_listar_blacklist" });
+            const blackList = Array.isArray(black) ? black : [];
+            document.getElementById('blacklist-tbody').innerHTML = blackList.map(b => `
+                <tr>
+                    <td><code>${b.novaplay_id}</code></td>
+                    <td><button class="btn-danger-text" onclick="removeBlacklist(${b.id})">BORRAR</button></td>
+                </tr>
+            `).join('') || `<tr><td colspan="2" style="text-align:center; color:var(--text-muted);">Lista negra vacía</td></tr>`;
 
-        // Cargar Logs
-        const logs = await req({ action: "listar_logs" });
-        document.getElementById('logs-container').innerHTML = logs.map(l => `
-            <div class="log-item">
-                <h4>${l.name}</h4>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:5px;">
-                    <a href="https://wxlhqitmigmkpfcsqyzt.supabase.co/storage/v1/object/public/Logs_NovaPlay/${l.name}" target="_blank" class="btn-premium">VER</a>
-                    <button class="btn-premium alt" onclick="downloadLog('${l.name}')">DESCARGAR</button>
-                    <button class="btn-danger-text" onclick="deleteLog('${l.name}')" style="grid-column: span 2; padding:8px; font-size:10px;">BORRAR REPORTE</button>
+            // Cargar Logs
+            const logs = await req({ action: "listar_logs" });
+            const logsList = Array.isArray(logs) ? logs : [];
+            document.getElementById('logs-container').innerHTML = logsList.map(l => `
+                <div class="log-item">
+                    <h4>${l.name}</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:5px;">
+                        <a href="https://wxlhqitmigmkpfcsqyzt.supabase.co/storage/v1/object/public/Logs_NovaPlay/${l.name}" target="_blank" class="btn-premium">VER</a>
+                        <button class="btn-premium alt" onclick="downloadLog('${l.name}')">DESCARGAR</button>
+                        <button class="btn-danger-text" onclick="deleteLog('${l.name}')" style="grid-column: span 2; padding:8px; font-size:10px;">BORRAR REPORTE</button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('') || `<div style="color:var(--text-muted); text-align:center; grid-column:1/-1;">No hay reportes de emergencia</div>`;
+
+            novaToast("Datos recargados correctamente");
+        } catch (e) {
+            console.error("Error recargando datos:", e);
+            novaToast("Error al recargar datos", true);
+        } finally {
+            if (reloadIcon) reloadIcon.classList.remove("fa-spin");
+        }
     }
 
     async function downloadLog(name) {
