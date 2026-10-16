@@ -490,6 +490,12 @@
             `).join('') || `<div style="color:var(--text-muted); text-align:center; grid-column:1/-1;">No hay reportes de emergencia</div>`;
 
             novaToast("Datos recargados correctamente");
+            setTimeout(() => {
+                const savedScroll = localStorage.getItem('novaplay_security_scroll');
+                if (savedScroll && appContainer) {
+                    appContainer.scrollTop = parseInt(savedScroll, 10);
+                }
+            }, 50);
         } catch (e) {
             console.error("Error recargando datos:", e);
             novaToast("Error al recargar datos", true);
@@ -594,6 +600,13 @@
     });
 
     document.getElementById("password").addEventListener("keydown", e => { if (e.key === "Enter") iniciarSesion(); });
+
+    const appContainer = document.querySelector('.app-container');
+    if (appContainer) {
+        appContainer.addEventListener('scroll', () => {
+            localStorage.setItem('novaplay_security_scroll', appContainer.scrollTop);
+        });
+    }
 
     if (sessionToken) UI_MostrarPanel(), loadData();
     else UI_MostrarLogin();
