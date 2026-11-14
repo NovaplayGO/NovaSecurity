@@ -288,7 +288,7 @@
 </footer>
 
 <script>
-    const API_URL = "https://mrghnngupolsgatcmevw.supabase.co/functions/v1/actualizar-canales";
+    const API_URL = "https://qqqpewuumwdrefpfnyvg.supabase.co/functions/v1/actualizar-canales";
     let sessionToken = localStorage.getItem("novaplay_session_token") || "";
     let deviceDict = {};
 
@@ -483,7 +483,7 @@
                 <div class="log-item">
                     <h4>${l.name}</h4>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:5px;">
-                        <a href="https://wxlhqitmigmkpfcsqyzt.supabase.co/storage/v1/object/public/Logs_NovaPlay/${l.name}" target="_blank" class="btn-premium">VER</a>
+                        <a href="https://qqqpewuumwdrefpfnyvg.supabase.co/storage/v1/object/public/logs/${l.name}" target="_blank" class="btn-premium">VER</a>
                         <button class="btn-premium alt" onclick="downloadLog('${l.name}')">DESCARGAR</button>
                         <button class="btn-danger-text" onclick="deleteLog('${l.name}')" style="grid-column: span 2; padding:8px; font-size:10px;">BORRAR REPORTE</button>
                     </div>
@@ -506,7 +506,7 @@
     }
 
     async function downloadLog(name) {
-        const url = `https://wxlhqitmigmkpfcsqyzt.supabase.co/storage/v1/object/public/Logs_NovaPlay/${name}`;
+        const url = `https://qqqpewuumwdrefpfnyvg.supabase.co/storage/v1/object/public/logs/${name}`;
         try {
             const res = await fetch(url);
             const blob = await res.blob();
